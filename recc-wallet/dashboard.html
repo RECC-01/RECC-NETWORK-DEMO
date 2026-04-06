@@ -1,0 +1,331 @@
+<!DOCTYPE html><html>
+<head>
+<title>RECC WALLET</title><style>
+body{margin:0;background:#000;color:#d4af37;font-family:Arial;}
+
+.app{display:flex;min-height:100vh;}
+
+.sidebar{
+width:300px;
+background:#000;
+padding:20px;
+border-right:1px solid #d4af37;
+}
+
+.main{flex:1;padding:20px;}
+
+h2,h3,h4{color:#d4af37;}
+p{color:#ccc;}
+
+#data{
+word-break:break-all;
+overflow-wrap:break-word;
+}
+
+#data p{
+font-size:12px;
+line-height:1.4;
+}
+
+input,select{
+display:block;
+margin:10px 0;
+padding:10px;
+width:90%;
+border-radius:8px;
+border:1px solid #d4af37;
+background:#000;
+color:#fff;
+}
+
+button{
+padding:10px;
+background:#000;
+border:1px solid #d4af37;
+border-radius:8px;
+cursor:pointer;
+color:#d4af37;
+}
+
+button:hover{
+background:#d4af37;
+color:#000;
+}
+
+.token,.account{
+padding:10px;
+margin:5px 0;
+border:1px solid #d4af37;
+border-radius:8px;
+word-break:break-all;
+cursor:pointer;
+}
+
+.header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+}
+
+.logo{
+width:45px;
+height:45px;
+border-radius:50%;
+border:2px solid #d4af37;
+}
+
+.footer{
+text-align:center;
+padding:15px;
+font-size:12px;
+color:#777;
+border-top:1px solid #222;
+}
+
+.tx{
+font-size:11px;
+border-bottom:1px solid #222;
+padding:5px;
+color:#aaa;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script></head><body><div class="app"><div class="sidebar"><div class="header">
+<img src="/img/RECC-WALLET.jpg" class="logo">
+<h3>PERFIL RECC WALLET</h3>
+</div><div id="data"></div><button onclick="logout()">Cerrar sesión</button>
+
+<hr><h4>➕ Importar cuenta</h4>
+<input id="pk" placeholder="Private Key">
+<input id="name" placeholder="Nombre cuenta">
+<button onclick="importWallet()">Guardar</button><h4>Mis cuentas</h4>
+<div id="accounts"></div><hr><h4>💱 SWAP</h4><select id="walletSelector" onchange="renderTokens()"></select>
+
+<select id="swapFrom"></select>
+<select id="swapTo"></select>
+
+<input id="swapAmount" placeholder="Cantidad">
+<button onclick="doSwap()">Ejecutar Swap</button></div><div class="main"><div class="header">
+<img src="/img/LOGO_RECC.jpg" class="logo">
+<h2>RECC WALLET</h2>
+</div><div id="tokens"></div><h3>📜 Historial</h3>
+<div id="history"></div></div></div><div class="footer">
+© 2026 RECC-WALLET --- RECCNETWORK BLOCKCHAIN --- POWERED BY RECC GROUP HOLDINGS
+</div><script>
+
+const user=JSON.parse(localStorage.getItem("user"));
+if(!user)location.href="index.html";
+
+const provider = new ethers.JsonRpcProvider("TU RPC");
+const API_URL = "TU API";
+
+const PAIR = "0xabc";
+
+const pairABI = [
+"function swap(address tokenIn,uint amountIn) returns(uint)"
+];
+
+// 🔥 FIX REAL
+function fixAddress(addr){
+if(!addr) return null;
+if(addr.startsWith("recc1-")){
+return addr.replace("recc1-","");
+}
+return addr;
+}
+
+// PERFIL
+function renderUser(){
+document.getElementById("data").innerHTML=`
+<p>ID: ${user.user_id}</p>
+<p>Nombres: ${user.nombre}</p>
+<p>Apellidos: ${user.apellido}</p>
+<p>Tel: ${user.telefono || "No definido"}</p>
+<p>Email: ${user.email || "No definido"}</p>
+<p>Wallet: ${user.wallet_address}</p>
+<p>Prof: ${user.profesion || "FUNDADOR RECC GROUP HOLDINGS"}</p>
+<p>Rol: ${user.role || "RECC FUNDADOR"}</p>
+<p>KYC: ${user.kyc_verified ? "✅" : "❌"}</p>
+`;
+}
+renderUser();
+
+// LOGOUT
+function logout(){
+localStorage.removeItem("user");
+location.href="index.html";
+}
+
+// IMPORTAR WALLET
+function importWallet(){
+const pk=document.getElementById("pk").value;
+const name=document.getElementById("name").value;
+
+if(!pk) return alert("Private key requerida");
+
+try{
+const wallet=new ethers.Wallet(pk);
+
+let wallets=JSON.parse(localStorage.getItem("wallets")||"[]");
+
+wallets.push({
+name:name||"Cuenta",
+privateKey:pk,
+address:wallet.address
+});
+
+localStorage.setItem("wallets",JSON.stringify(wallets));
+
+renderWallets();
+renderTokens();
+
+}catch{
+alert("Private key inválida");
+}
+}
+
+// ELIMINAR WALLET
+function deleteWallet(index){
+let wallets=JSON.parse(localStorage.getItem("wallets")||"[]");
+wallets.splice(index,1);
+localStorage.setItem("wallets",JSON.stringify(wallets));
+renderWallets();
+renderTokens();
+}
+
+// RENDER CUENTAS
+function renderWallets(){
+
+const wallets=JSON.parse(localStorage.getItem("wallets")||"[]");
+
+document.getElementById("accounts").innerHTML=
+wallets.map((w,i)=>`
+<div class="account" onclick="selectWallet(${i})">
+<b>${w.name}</b><br>
+${w.address}<br>
+<button onclick="event.stopPropagation();deleteWallet(${i})">Eliminar</button>
+</div>`).join("");
+
+let selector=`<option value="main">Principal</option>`;
+wallets.forEach((w,i)=>{
+selector+=`<option value="${i}">${w.name}</option>`;
+});
+
+document.getElementById("walletSelector").innerHTML=selector;
+}
+
+function selectWallet(i){
+document.getElementById("walletSelector").value=i;
+renderTokens();
+}
+
+renderWallets();
+
+// WALLET ACTUAL
+function getCurrentAddress(){
+const wallets=JSON.parse(localStorage.getItem("wallets")||"[]");
+const selected=document.getElementById("walletSelector").value;
+
+if(selected==="main") return user.wallet_address;
+
+return wallets[selected]?.address;
+}
+
+// TOKENS
+async function getTokens(address){
+try{
+const res = await fetch(`${API_URL}/tokens/${address}`);
+const data = await res.json();
+return data.tokens || [];
+}catch{
+return [];
+}
+}
+
+// SWAP UI
+function loadSwap(tokens){
+document.getElementById("swapFrom").innerHTML =
+tokens.map(t=>`<option value="${t}">${t}</option>`).join("");
+
+document.getElementById("swapTo").innerHTML =
+tokens.map(t=>`<option value="${t}">${t}</option>`).join("");
+}
+
+// 🔥 TOKENS FINAL (ARREGLADO)
+async function renderTokens(){
+
+let html="";
+
+const address = fixAddress(getCurrentAddress());
+
+// 🔥 TOKEN NATIVO (RTS)
+try{
+const balance = await provider.getBalance(address);
+const rts = ethers.formatEther(balance);
+
+html += `<div class="token"><b>RTS</b>: ${rts}</div>`;
+}catch(e){
+console.log("Error RTS:", e.message);
+}
+
+// 🔵 TOKENS INDEXER
+const detected = await getTokens(address);
+loadSwap(detected);
+
+for(const addr of detected){
+try{
+const token = new ethers.Contract(addr,
+["function balanceOf(address) view returns (uint256)",
+ "function symbol() view returns (string)",
+ "function decimals() view returns (uint8)"],
+provider);
+
+const bal = await token.balanceOf(address);
+if(bal == 0n) continue;
+
+const sym = await token.symbol();
+const dec = await token.decimals();
+
+html += `<div class="token">${sym}: ${ethers.formatUnits(bal,dec)}</div>`;
+}catch{}
+}
+
+// 🔥 TOKENS MANUALES (IRECC)
+const MANUAL_TOKENS = [
+"0xDIRECCION_IRECC_1",
+"0xDIRECCION_IRECC_2"
+];
+
+for(const addr of MANUAL_TOKENS){
+
+try{
+const token = new ethers.Contract(addr,[
+"function balanceOf(address) view returns (uint256)",
+"function symbol() view returns (string)",
+"function decimals() view returns (uint8)"
+],provider);
+
+const bal = await token.balanceOf(address);
+
+if(bal > 0){
+const sym = await token.symbol();
+const dec = await token.decimals();
+
+html += `<div class="token">${sym}: ${ethers.formatUnits(bal,dec)}</div>`;
+}
+
+}catch(e){}
+}
+
+if(html===""){
+html = `<div class="token">No tienes fondos</div>`;
+}
+
+document.getElementById("tokens").innerHTML=html;
+
+loadHistory(address);
+}
+
+renderTokens();
+
+</script></body>
+</html>

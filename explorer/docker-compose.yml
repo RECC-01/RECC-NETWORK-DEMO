@@ -1,0 +1,23 @@
+services:
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: blockscout
+
+  backend:
+    image: blockscout/blockscout:latest
+    depends_on:
+      - db
+    environment:
+      ETHEREUM_JSONRPC_HTTP_URL: TU RPC
+
+      DATABASE_URL: postgres://postgres:postgres@db:5432/blockscout?ssl=false
+      CHAIN_ID: "24885"
+
+      DISABLE_TRACING: "true"
+
+    ports:
+      - "4000:4000"

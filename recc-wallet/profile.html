@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RECC Wallet</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      padding: 40px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+    }
+
+    h2 {
+      color: #22c55e;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>🚀 RECC PROFILE</h2>
+
+    <p><strong>ID:</strong> <span id="user_id"></span></p>
+    <p><strong>Nombre:</strong> <span id="nombre"></span></p>
+    <p><strong>Apellido:</strong> <span id="apellido"></span></p>
+    <p><strong>Wallet:</strong> <span id="wallet"></span></p>
+    <p><strong>KYC:</strong> <span id="kyc"></span></p>
+    <p><strong>Rol:</strong> <span id="role"></span></p>
+  </div>
+
+  <script>
+    const userId = "RECC-8W130F-20260329-000001"; // 👈 TU ID REAL
+
+    fetch(`http://localhost:7000/api/users/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("user_id").innerText = data.user_id;
+        document.getElementById("nombre").innerText = data.nombre;
+        document.getElementById("apellido").innerText = data.apellido;
+        document.getElementById("wallet").innerText = data.wallet_address;
+        document.getElementById("kyc").innerText = data.kyc_verified ? "VERIFICADO ✅" : "NO VERIFICADO ❌";
+        document.getElementById("role").innerText = data.role || "USER";
+      });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RECCNETWORK</title>
+<link rel="icon" href="img/LOGO_RECC.jpg">
+<link rel="shortcut icon" href="img/LOGO_RECC.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 🔥 CAMBIO REAL -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+
+<style>
+
+html, body{
+margin:0;
+padding:0;
+height:100%;
+background:#000;
+color:#d4af37;
+font-family:Arial;
+text-align:center;
+}
+
+.wrapper{
+min-height:100%;
+display:flex;
+flex-direction:column;
+}
+
+.content{
+flex:1;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+border-bottom:1px solid #111;
+}
+
+.logoWrap{
+height:180px;
+width:180px;
+border-radius:30%;
+border:3px solid #d4af37;
+overflow:hidden;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#000;
+box-shadow:none;
+}
+
+.logoWrap img{
+width:95%;
+height:95%;
+object-fit:cover;
+}
+
+.title{text-align:left;}
+.title h1{ margin:0; font-size:30px; }
+.title p{ margin:0; font-size:13px; color:#d4af37; }
+
+.wallet-btn{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 15px;
+border:2px solid #d4af37;
+background:black;
+color:#d4af37;
+border-radius:10px;
+cursor:pointer;
+}
+
+.wallet-btn img{
+width:22px;
+height:22px;
+object-fit:contain;
+}
+
+.tokens{
+display:flex;
+justify-content:center;
+gap:30px;
+flex-wrap:wrap;
+margin-top:40px;
+}
+
+.card{
+background:#0a0a0a;
+border:1px solid #222;
+padding:20px;
+border-radius:12px;
+width:220px;
+}
+
+/* 🔥 TUS CAJONES (NO TOCADOS) */
+
+.rts-box,.recc-box,.luna-box,.usdt-box{
+width:90px;
+height:90px;
+border-radius:50%;
+overflow:hidden;
+margin:auto;
+border:3px solid #d4af37;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#000;
+}
+
+.rts-img{ width:90%; height:90%; object-fit:cover; transform:scale(1.1); }
+.recc-img{ width:90%; height:90%; object-fit:cover; transform:scale(1.3); }
+.luna-img{ width:80%; height:80%; object-fit:cover; transform:scale(1.2); }
+.usdt-img{ width:80%; height:80%; object-fit:cover; transform:scale(1.4); }
+
+.bridge{ margin-top:50px; }
+
+input{
+padding:12px;
+width:260px;
+margin:10px;
+background:#000;
+border:2px solid #d4af37;
+color:#d4af37;
+border-radius:8px;
+text-align:center;
+}
+
+button{
+padding:12px 22px;
+border:2px solid #d4af37;
+background:black;
+color:#d4af37;
+border-radius:10px;
+cursor:pointer;
+margin-top:10px;
+}
+
+footer{
+padding:25px;
+border-top:1px solid #111;
+color:#aaa;
+font-size:13px;
+line-height:1.6;
+}
+
+.success{ color:#00ff88; }
+.error{ color:#ff4d4d; }
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+<div class="content">
+
+<div class="header">
+
+<div style="display:flex; align-items:center; gap:20px;">
+<div class="logoWrap">
+<img src="img/RECCNETWORK.jpg">
+</div>
+
+<div class="title">
+<h1>RECCNETWORK</h1>
+<p>BLOCKCHAIN</p>
+</div>
+</div>
+
+<button id="btn" class="wallet-btn">
+<img src="img/LOGO_RECC.jpg">
+<span id="walletText">Conectar Wallet</span>
+</button>
+
+</div>
+
+<h2>Infraestructura blockchain soberana</h2>
+
+<div class="tokens">
+
+<div class="card">
+<div class="rts-box"><img src="img/RTS.jpg" class="rts-img"></div>
+<h3>RTS</h3>
+<p>Gas y gobernanza</p>
+</div>
+
+<div class="card">
+<div class="recc-box"><img src="img/RECC1.jpg" class="recc-img"></div>
+<h3>RECC</h3>
+<p>Reserva de valor</p>
+</div>
+
+<div class="card">
+<div class="luna-box"><img src="img/LUNA.jpg" class="luna-img"></div>
+<h3>LUNA</h3>
+<p>Token meme / juego</p>
+</div>
+
+<div class="card">
+<div class="usdt-box"><img src="img/USDT.jpg" class="usdt-img"></div>
+<h3>wUSDT</h3>
+<p>USDT en RECC</p>
+</div>
+
+</div>
+
+<div class="bridge">
+
+<h2>Bridge USDT</h2>
+
+<input id="amount" placeholder="Monto"><br>
+<input id="receiver" placeholder="Dirección RECC"><br>
+
+<button onclick="deposit()">Enviar BSC → RECC</button><br>
+<button onclick="withdraw()">Retirar RECC → BSC</button>
+
+<p id="bridgeStatus"></p>
+
+</div>
+
+</div>
+
+<footer>
+© 2026 RECCNETWORK BLOCKCHAIN — Powered by RECC Group Holdings<br><br>
+📧 reccnetwork.blockchain@gmail.com<br>
+📧 reccgroupholdings@gmail.com<br>
+🐙 github.com/RECC-01<br><br>
+👁 Visitas: <span id="visits">0</span><br>
+🕒 <span id="datetime"></span>
+</footer>
+
+</div>
+
+<script>
+
+let provider, signer, account;
+
+const USDT = "0xabc";
+const BRIDGE = "0xabc";
+const WUSDT = "0xabc";
+
+/* WALLET */
+document.getElementById("btn").onclick=async()=>{
+provider = new ethers.BrowserProvider(window.ethereum);
+await provider.send("eth_requestAccounts", []);
+signer = await provider.getSigner();
+account = await signer.getAddress();
+
+document.getElementById("walletText").innerText =
+account.slice(0,6)+"..."+account.slice(-4);
+};
+
+/* 🔥 DEPOSIT EXACTO COMO TU SCRIPT */
+async function deposit(){
+
+if(!signer) return show("Conecta wallet");
+
+let amount = document.getElementById("amount").value;
+let receiver = document.getElementById("receiver").value;
+
+try{
+
+const usdt = new ethers.Contract(
+USDT,
+["function approve(address spender,uint256 amount)"],
+signer
+);
+
+const bridge = new ethers.Contract(
+BRIDGE,
+["function deposit(uint256 amount,string reccAddress)"],
+signer
+);
+
+const value = ethers.parseUnits(amount,18);
+
+show("Aprobando...");
+
+let tx1 = await usdt.approve(BRIDGE,value);
+await tx1.wait();
+
+show("Deposit...");
+
+let tx2 = await bridge.deposit(value,receiver);
+await tx2.wait();
+
+show("✅ DEPÓSITO OK");
+
+}catch(e){
+console.log(e);
+show("❌ ERROR DEPÓSITO");
+}
+
+}
+
+/* 🔥 WITHDRAW */
+async function withdraw(){
+
+if(!signer) return show("Conecta wallet");
+
+let amount = document.getElementById("amount").value;
+let target = document.getElementById("receiver").value;
+
+try{
+
+const wusdt = new ethers.Contract(
+WUSDT,
+["function bridgeBurn(uint256 amount,string targetAddress)"],
+signer
+);
+
+const value = ethers.parseUnits(amount,18);
+
+let tx = await wusdt.bridgeBurn(value,target);
+await tx.wait();
+
+show("🔥 RETIRO OK");
+
+}catch(e){
+console.log(e);
+show("❌ ERROR RETIRO");
+}
+
+}
+
+function show(msg){
+document.getElementById("bridgeStatus").innerText=msg;
+}
+
+/* VISITAS */
+let v = localStorage.getItem("visits") || 0;
+v++;
+localStorage.setItem("visits", v);
+document.getElementById("visits").innerText = v;
+
+/* FECHA */
+setInterval(()=>{
+document.getElementById("datetime").innerText =
+new Date().toLocaleString();
+},1000);
+
+</script>
+
+</body>
+</html>
+
+
